@@ -23,6 +23,14 @@ def send_code_to_user(email):
     send_email = EmailMessage(subject = subject,body = messaage , from_email=from_email ,to=[to_email])
     send_email.send(fail_silently=True)
     
-    
+def send_normal_email(data):
+    email = EmailMessage (
+        subject=data.get('email_subject'),
+        body = data.get('email_body'),
+        from_email= 'kumarmanoj8260910@gmail.com',
+        to=[data.get('to_email'), ]       
+    )
+    email.send(fail_silently=True)
+        
     
     

@@ -6,6 +6,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from .utils import send_code_to_user
 from rest_framework.permissions import IsAuthenticated
+# for password reset
+from .serializers import PaswordResetRequestSerializer , NewPasswordSerializers
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import smart_str ,DjangoUnicodeDecodeError
 
 # Create your views here.
 
@@ -65,6 +70,38 @@ class TestAuthenticatedView(GenericAPIView):
         }
         return Response(data,status=status.HTTP_200_OK)
 
-
+class PasswordResetRequestView(GenericAPIView):
+    serializer_class = PaswordResetRequestSerializer
+    
+    def post(self,request):
+        seralizer = self.serializer_class(data=request.data,context = {'request':request})
+        seralizer.is_valid(raise_exception=True)
+        return Response(
+            {
+                'messgae' :'a password reset link sebd to your register email id ,check your email !'
+            },status=status.HTTP_200_OK
+        )
+class PaswordResetConfirmView(GenericAPIView):
+    def get(self,request,uidb64,token):
+        try:
+           uid  = smart_str(urlsafe_base64_decode(uidb64))
+           user = User.objects.get(id = uid)
+           if not PasswordResetTokenGenerator().check_token(user,token):
+               return Response({'message' : 'token has invalid or expired'},status=status.HTTP_200_OK)
+           return Response({'sucess' : True ,'message' : 'credentials is valid', 'uidb64':uidb64 ,'token' :token })
+        except DjangoUnicodeDecodeError:   
+            return Response({'message' : 'token has invalid or expired'},status=status.HTTP_401_UNAUTHORIZED)
+        
+    
+class NewPasswordView(GenericAPIView):
+    serializer_class =NewPasswordSerializers 
+    def patch(self,request):
+        serializer = self.serializer_class(data= request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response({
+            'message' : 'password reset confirm '
+        },status=status.HTTP_200_OK)
+           
+        
 
 
