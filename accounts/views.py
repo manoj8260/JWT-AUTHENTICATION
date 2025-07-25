@@ -11,6 +11,8 @@ from .serializers import PaswordResetRequestSerializer , NewPasswordSerializers
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import smart_str ,DjangoUnicodeDecodeError
+#for logout
+from .serializers import LogoutSerialiser
 
 # Create your views here.
 
@@ -102,6 +104,17 @@ class NewPasswordView(GenericAPIView):
             'message' : 'password reset confirm '
         },status=status.HTTP_200_OK)
            
-        
+class LogoutView(GenericAPIView):
+    serializer_class = LogoutSerialiser
+    permission_classes=[IsAuthenticated]
+    
+    def post(self,request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({
+            'message' : 'logout sucessfully'
+        },status=status.HTTP_200_OK)
+                
 
 
